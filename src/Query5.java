@@ -8,7 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import org.apache.commons.math3.stat.inference.TTest;
 
-public class OracleJDBC {
+public class Query5 {
    // JDBC driver name and database URL
    static final String JDBC_DRIVER = "oracle.jdbc.driver.OracleDriver";  
    static final String DB_URL = "jdbc:oracle:thin:@//dbod-scan.acsu.buffalo.edu:1521/cse00000.buffalo.edu";
@@ -48,34 +48,34 @@ public class OracleJDBC {
       
       ResultSet rs = stmt.executeQuery(sql);
       //STEP 5: Extract data from result set
-      ArrayList<Double> list = new ArrayList<Double>();
+      ArrayList<Double> list1 = new ArrayList<Double>();
       ArrayList<Double> list2 = new ArrayList<Double>();
       
       double sample1Sum = 0.0;
+      
       while(rs.next()){
     	  
          //Retrieve by column name
         
          Double exp = rs.getDouble("EXP");
          sample1Sum += exp;
-         list.add(exp);
+         list1.add(exp);
       }
-      
-      double mean1 = sample1Sum/list.size();
+      int count1=list1.size();
+      double mean1 = sample1Sum/count1;
       double variance1 = 0.0;
       
-      System.out.println(list);
+      //System.out.println(list);
       //public double pairedT(double[] sample1,
       //double[] sample2)
-      double[] sample1 = new double[list.size()];
+      double[] sample1 = new double[count1];
      
-      int i = 0;
-      for(; i < list.size(); i++) {
-    	  sample1[i] = list.get(i);
+      for(int i = 0; i < count1; i++) {
+    	  sample1[i] = list1.get(i);
     	  variance1 += Math.pow(sample1[i] - mean1, 2); 
       }
-      System.out.println("list size is " + list.size());
-      variance1 = variance1 / (list.size() - 1);     
+      //System.out.println("list size is " + list.size());
+     variance1 = variance1 / (count1 - 1);     
       
       //Similarly get the next sample
       
@@ -100,25 +100,36 @@ public class OracleJDBC {
          list2.add(exp);
          //System.out.println(" EXP: " + exp);
       }
-      
-      double mean2=sample2Sum/list2.size();
+      int count2 = list2.size();
+      double mean2 = sample2Sum/count2;
       
       
       //System.out.println(list);
       //public double pairedT(double[] sample1,
       //double[] sample2)
-      double[] sample2 = new double[list2.size()];
+      double[] sample2 = new double[count2];
       double variance2 = 0;
-      i = 0;
-      for(; i < list2.size(); i++) {
+      int i = 0;
+      for(; i < count2; i++) {
     	  sample2[i] = list2.get(i);
-    	  variance2 += Math.pow( sample2[i]-mean2, 2);
+    	  variance2 += Math.pow( sample2[i] - mean2, 2);
       }
       
-      variance2 = variance2 / (list2.size()-1);
+      variance2 = variance2 / (count2-1);
       //System.out.println(sample2);
       
-      double tt = Math.abs(mean1 - mean2) / (Math.sqrt(variance1/list.size() + variance2/list2.size()));
+      double pooledVariance = ((count1-1) * variance1 + (count2-1) * variance2 ) / (count1+count2-2);
+      //double totalVariance= (variance1 + variance2) / (count1 + count2 - 2 ) ;
+      
+      //double temp= Math.sqrt( ((count1 - 1) * variance1 + (count2 - 1) * variance1) / (count1 + count2 - 2));
+      
+      double newT= (mean2 - mean1) / (Math.sqrt(pooledVariance * ( (1/count1) + (1/count2) )));
+      
+      System.out.println("-----********---------");
+      System.out.println(newT);
+      
+      
+      double tt = Math.abs(mean1 - mean2) / (Math.sqrt(variance1/count1 + variance2/count2));
       
       System.out.println("--------------");
       System.out.println(tt);
