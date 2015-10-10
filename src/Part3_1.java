@@ -119,7 +119,38 @@ public class Part3_1 {
 			System.out.println(informativeGene.size());
 			
 			//part 3_2
+			/*
+			sql= "select * from test_samples";
 			
+			rs = stmt.executeQuery(sql);
+			
+			ArrayList<ArrayList<Double>> testSamples = new ArrayList<ArrayList<Double>>();
+			
+			for (int i =  0; i < 5; i++) {
+				testSamples.add(new ArrayList<Double>());
+			}
+			
+			
+			while(rs.next()){
+				Integer gene_uid = rs.getInt("GENE_UID");
+				if(informativeGene.contains(gene_uid)) {
+					Double exp = rs.getDouble("TEST1");
+					testSamples.get(0).add(exp);
+					exp = rs.getDouble("TEST2");
+					testSamples.get(1).add(exp);
+					exp = rs.getDouble("TEST3");
+					testSamples.get(2).add(exp);
+					exp = rs.getDouble("TEST4");
+					testSamples.get(3).add(exp);
+					exp = rs.getDouble("TEST5");
+					testSamples.get(4).add(exp);
+					
+				}
+
+				
+			}
+			System.out.println(testSamples);
+			*/
 			//STEP 6: Clean-up environment
 			rs.close();
 			stmt.close();
