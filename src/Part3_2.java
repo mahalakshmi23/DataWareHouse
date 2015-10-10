@@ -65,7 +65,7 @@ public class Part3_2 {
 				//System.out.println(gene_uid + ":" + exp +" - " +genes.indexOf(gene_uid));
 				allData.get(genes.indexOf(gene_uid)).add(exp);	
 			}
-			System.out.println(allData);
+			
 
 			// get not all data
 			sql = "SELECT MF.EXP,pb.U_ID FROM CLINICAL_FACT CF INNER JOIN MICROARRAY_FACT MF ON CF.S_ID=MF.S_ID " +
@@ -96,8 +96,7 @@ public class Part3_2 {
 				notData.get(notGenes.indexOf(gene_uid)).add(exp);	
 			}
 
-			System.out.println(allData.size());
-			System.out.println(notData.size());
+			
 
 			ArrayList<Integer> informativeGene = new ArrayList<Integer>();
 			TTest t = new TTest();
@@ -119,7 +118,7 @@ public class Part3_2 {
 					informativeGene.add(genes.get(i));
 				}
 			}
-			System.out.println(informativeGene);
+			
 
 			//part 3_2
 			sql= "select * from test_samples";
@@ -151,8 +150,7 @@ public class Part3_2 {
 
 
 			}
-			System.out.println("test samples are :");
-			System.out.println(testSamples);
+			
 
 			//get the patients data with all
 			sql = "SELECT MF.EXP,pb.U_ID, CF.P_ID FROM CLINICAL_FACT CF INNER JOIN MICROARRAY_FACT MF ON CF.S_ID=MF.S_ID " +
@@ -184,8 +182,7 @@ public class Part3_2 {
 					personsInformativeGenes.get(index).add(exp);
 				}
 			}
-			System.out.println("printing the person informative genes");
-			System.out.println(personsInformativeGenes.size());
+			
 			
 			//for not ALL values
 			sql = "SELECT MF.EXP,pb.U_ID, CF.P_ID FROM CLINICAL_FACT CF INNER JOIN MICROARRAY_FACT MF ON CF.S_ID=MF.S_ID " +
@@ -218,62 +215,58 @@ public class Part3_2 {
 			System.out.println(notPersonsInformativeGenes.size());
 			
 			//calculating correlation for pa and pn
-			ArrayList<Double> ra = new ArrayList<Double>();
+			ArrayList<Double> ra, rb;
 			PearsonsCorrelation p = new PearsonsCorrelation();
 			double[] s1, s2;
 			ArrayList<Double> l1,l2;
-			for(int i = 0;i < personsInformativeGenes.size(); i++) {
-				l1 = personsInformativeGenes.get(i);
-				int count1 = l1.size();
-				s1 = new double[count1];
-				for(int a = 0; a < count1; a++) {
-					s1[a] = l1.get(a);
+			for(int j = 0; j < 5; j++) {
+				ra =  new ArrayList<Double>();
+				l2 = testSamples.get(j);
+				int count2 = l2.size();
+				s2 = new double[count2];
+				for(int a = 0; a < count2; a++) {
+					s2[a] = l2.get(a);
 				}
-				//for(int j = 2; j < 3; j++) {
-					l2 = testSamples.get(3);
-					int count2 = l2.size();
-					s2 = new double[count2];
-					for(int a = 0; a < count2; a++) {
-						s2[a] = l2.get(a);
+				for(int i = 0;i < personsInformativeGenes.size(); i++) {
+					l1 = personsInformativeGenes.get(i);
+					int count1 = l1.size();
+					s1 = new double[count1];
+					for(int a = 0; a < count1; a++) {
+						s1[a] = l1.get(a);
 					}
+						
 					ra.add(p.correlation(s1, s2));          
-				//}
-			}
-			
-			ArrayList<Double> rb = new ArrayList<Double>();
-			for(int i = 0;i < notPersonsInformativeGenes.size(); i++) {
-				l1 = notPersonsInformativeGenes.get(i);
-				int count1 = l1.size();
-				s1 = new double[count1];
-				for(int a = 0; a < count1; a++) {
-					s1[a] = l1.get(a);
+				
 				}
-				//for(int j = 2; j < 3; j++) {
-					l2 = testSamples.get(3);
-					int count2 = l2.size();
-					s2 = new double[count2];
-					for(int a = 0; a < count2; a++) {
-						s2[a] = l2.get(a);
-					}
-					rb.add(p.correlation(s1, s2));          
-				//}
-			}
-			double[] result1 = new double[ra.size()];
-			for(int i = 0; i < ra.size(); i++) {
-				result1[i] = ra.get(i);
-			}
-			double[] result2 = new double[rb.size()];
-			for(int i = 0; i < rb.size(); i++) {
-				result2[i] = rb.get(i);
-			}
-			double finalP = t.homoscedasticTTest(result1, result2);
-			System.out.println("pval is "+ finalP);
-			if(finalP < 0.01) {
-				System.out.println("classified as ALL");
-			} else {
-				System.out.println("NOT Classified");
-			}
 			
+				rb = new ArrayList<Double>();
+				for(int i = 0;i < notPersonsInformativeGenes.size(); i++) {
+					l1 = notPersonsInformativeGenes.get(i);
+					int count1 = l1.size();
+					s1 = new double[count1];
+					for(int a = 0; a < count1; a++) {
+						s1[a] = l1.get(a);
+					}
+					
+						rb.add(p.correlation(s1, s2));     
+				}
+				double[] result1 = new double[ra.size()];
+				for(int x = 0; x < ra.size(); x++) {
+					result1[x] = ra.get(x);
+				}
+				double[] result2 = new double[rb.size()];
+				for(int x = 0; x < rb.size(); x++) {
+					result2[x] = rb.get(x);
+				}
+				double finalP = t.homoscedasticTTest(result1, result2);
+				System.out.println("pval is "+ finalP);
+				if(finalP < 0.01) {
+					System.out.println( (j + 1) + " is classified as ALL");
+				} else {
+					System.out.println( (j + 1) + " is NOT Classified");
+				}
+			}
+			/*
 			for(int i = 0;i < personsInformativeGenes.size(); i++) {
 				l1 = personsInformativeGenes.get(i);
 				int count1 = l1.size();
@@ -291,7 +284,8 @@ public class Part3_2 {
 					ra.add(p.correlation(s1, s2));          
 				//}
 			}
-			
+			*/
+			/*
 			rb = new ArrayList<Double>();
 			for(int i = 0;i < notPersonsInformativeGenes.size(); i++) {
 				l1 = notPersonsInformativeGenes.get(i);
@@ -325,7 +319,7 @@ public class Part3_2 {
 			} else {
 				System.out.println("NOT Classified");
 			}
-			
+			*/
 			
 			//STEP 6: Clean-up environment
 			rs.close();
