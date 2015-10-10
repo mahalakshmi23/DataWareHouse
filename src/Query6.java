@@ -64,8 +64,7 @@ public class Query6 {
 				}
 
 				Double exp = rs.getDouble("EXP");
-				data.get(patients.indexOf(p_id)).add(exp);
-				
+				data.get(patients.indexOf(p_id)).add(exp);	
 			}
 			
 			PearsonsCorrelation p = new PearsonsCorrelation();
@@ -82,7 +81,6 @@ public class Query6 {
 		      		dataList1 = data.get(i);
 		      		sample1 = new double[dataList1.size()];
 		      		for(int a = 0; a < dataList1.size(); a++) {
-		      			System.out.println(dataList1.get(a));
 		      			sample1[a] = dataList1.get(a);
 		      		}
 		      		dataList2 = data.get(j);
@@ -99,6 +97,60 @@ public class Query6 {
 		      
 		      System.out.println("result for ALL to ALL is ");
 		      System.out.println(avgCor);
+		      
+		      
+		      //get got aml
+		      
+		      sql = "SELECT p_id, exp FROM CLINICAL_FACT CF INNER JOIN " +"	MICROARRAY_FACT MF ON CF.S_ID=MF.S_ID WHERE CF.S_ID IN ( " +
+				"SELECT DISTINCT S_ID FROM CLINICAL_FACT WHERE P_ID IN (" +
+				"SELECT P_ID FROM CLINICAL_FACT WHERE DS_ID IN (SELECT DS_ID FROM DISEASE" +
+				" WHERE NAME='AML')) AND S_ID IS NOT NULL )" +
+				"AND MF.PB_ID IN " +
+				"(SELECT MF.PB_ID FROM MICROARRAY_FACT MF INNER JOIN PROBE PB ON MF.PB_ID=PB.PB_ID WHERE PB.PB_ID IN " +
+				"(SELECT PB.PB_ID FROM PROBE PB INNER JOIN GENE_FACT GF ON PB.U_ID=GF.GENE_UID WHERE GF.GENE_UID IN" +
+				"(SELECT GF.GENE_UID FROM GENE_FACT GF WHERE GO_ID=0007154)))";
+
+		      rs = stmt.executeQuery(sql);
+				
+				patients =new ArrayList<Integer>();
+				ArrayList<ArrayList<Double>> amlData = new ArrayList<ArrayList<Double>>();
+				//STEP 5: Extract data from result set
+				ArrayList<Double> amlList1 = new ArrayList<Double>();
+				ArrayList<Double> amlList2 = new ArrayList<Double>();
+
+				while(rs.next()){
+					Integer p_id = rs.getInt("P_ID");
+					if(!patients.contains(p_id)) {
+						patients.add(p_id);
+						amlData.add(new ArrayList<Double>());
+					}
+
+					Double exp = rs.getDouble("EXP");
+					amlData.get(patients.indexOf(p_id)).add(exp);	
+				}
+				
+			      
+			      for(int i = 0; i < data.size(); i++) {
+			      	for(int j = 0; j < amlData.size(); j++) {
+			      		
+			      		dataList1 = data.get(i);
+			      		sample1 = new double[dataList1.size()];
+			      		for(int a = 0; a < dataList1.size(); a++) {
+			      			sample1[a] = dataList1.get(a);
+			      		}
+			      		dataList2 = amlData.get(j);
+			      		sample2 = new double[dataList2.size()];
+			      		for(int a = 0; a < dataList2.size(); a++) {
+			      			sample2[a] = dataList2.get(a);
+			      		}
+			      		cor += p.correlation(sample1, sample2); 
+			      	}
+			      }
+			      
+			      avgCor = cor/(data.size() * amlData.size());
+			      
+			      System.out.println("result for AML to ALL is ");
+			      System.out.println(avgCor);
 			/*
 			int count1=list1.size();
 			double mean1 = sample1Sum/count1;
