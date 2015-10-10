@@ -1,166 +1,77 @@
-//STEP 1. Import required packages
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
+/*
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import org.apache.commons.math3.stat.inference.TTest;
 
 public class Query4 {
-   // JDBC driver name and database URL
-   static final String JDBC_DRIVER = "oracle.jdbc.driver.OracleDriver";  
-   static final String DB_URL = "jdbc:oracle:thin:@//dbod-scan.acsu.buffalo.edu:1521/cse00000.buffalo.edu";
 
-   //  Database credential
-   static final String USER = "mvenkata";
-   static final String PASS = "cse601";
-   
-   public static void main(String[] args) throws SQLException {
-   Connection conn = null;
-   Statement stmt = null;
-   
-   //Driver myDriver = new oracle.jdbc.driver.OracleDriver();
-   //DriverManager.registerDriver( myDriver );
-   
-   
-   try{
-      //STEP 2: Register JDBC driver
-      Class.forName("oracle.jdbc.driver.OracleDriver");
+	static RUN_QUERY runObj = new   RUN_QUERY ();
+	static Statistics statObj = new Statistics();
 
-      //STEP 3: Open a connection
-      System.out.println("Connecting to database...");
-      conn = DriverManager.getConnection(DB_URL,USER,PASS);
+	static double[] sample_1;
+	static double[] sample_2;
 
-      //STEP 4: Execute a query
-      System.out.println("Creating statement...");
-      stmt = conn.createStatement();
-      String sql;
-       
-      sql = "SELECT MF.EXP FROM CLINICAL_FACT CF INNER JOIN MICROARRAY_FACT MF ON CF.S_ID=MF.S_ID WHERE CF.S_ID IN ("+
-      "SELECT DISTINCT S_ID FROM CLINICAL_FACT WHERE P_ID IN ( SELECT P_ID FROM CLINICAL_FACT WHERE DS_ID IN ("+
-      "SELECT DS_ID FROM DISEASE WHERE NAME='ALL')) AND S_ID IS NOT NULL ) AND MF.PB_ID IN" +  
-      "(SELECT MF.PB_ID FROM MICROARRAY_FACT MF INNER JOIN PROBE PB ON MF.PB_ID=PB.PB_ID WHERE PB.PB_ID IN"+
-      "(SELECT PB.PB_ID FROM PROBE PB INNER JOIN GENE_FACT GF ON PB.U_ID=GF.GENE_UID WHERE GF.GENE_UID IN"+
-      "(SELECT GF.GENE_UID FROM GENE_FACT GF WHERE GO_ID=12502)))";
-      
-      
-      ResultSet rs = stmt.executeQuery(sql);
-      //STEP 5: Extract data from result set
-      ArrayList<Double> list1 = new ArrayList<Double>();
-      ArrayList<Double> list2 = new ArrayList<Double>();
-      
-      double sample1Sum = 0.0;
-      
-      while(rs.next()){
-    	  
-         //Retrieve by column name
-        
-         Double exp = rs.getDouble("EXP");
-         sample1Sum += exp;
-         list1.add(exp);
-      }
-      int count1=list1.size();
-      double mean1 = sample1Sum/count1;
-      double variance1 = 0.0;
-      
-      //System.out.println(list);
-      //public double pairedT(double[] sample1,
-      //double[] sample2)
-      double[] sample1 = new double[count1];
-     
-      for(int i = 0; i < count1; i++) {
-    	  sample1[i] = list1.get(i);
-    	  variance1 += Math.pow(sample1[i] - mean1, 2); 
-      }
-      //System.out.println("list size is " + list.size());
-     variance1 = variance1 / (count1 - 1);     
-      
-      //Similarly get the next sample
-      
-      sql = "SELECT MF.EXP FROM CLINICAL_FACT CF INNER JOIN MICROARRAY_FACT MF ON CF.S_ID=MF.S_ID WHERE CF.S_ID IN ("+
-		"SELECT DISTINCT S_ID FROM CLINICAL_FACT WHERE P_ID IN ("+
-   	 	"SELECT P_ID FROM CLINICAL_FACT WHERE DS_ID IN (SELECT DS_ID FROM DISEASE WHERE NAME!='ALL')) AND S_ID IS NOT NULL)"+
-   	 	"AND MF.PB_ID IN " + 
-		"(SELECT MF.PB_ID FROM MICROARRAY_FACT MF INNER JOIN PROBE PB ON MF.PB_ID=PB.PB_ID WHERE PB.PB_ID IN " +
-		"(SELECT PB.PB_ID FROM PROBE PB INNER JOIN GENE_FACT GF ON PB.U_ID=GF.GENE_UID WHERE GF.GENE_UID IN " +
-		"(SELECT GF.GENE_UID FROM GENE_FACT GF WHERE GO_ID=12502)))";
+	static double mean_1;
+	static double mean_2;
 
-      
- 
-      
-      rs = stmt.executeQuery(sql);
-      //STEP 5: Extract data from result set
-      double sample2Sum=0;
-      
-      while(rs.next()){
-         double exp = rs.getDouble("EXP");
-         sample2Sum += exp;
-         list2.add(exp);
-         //System.out.println(" EXP: " + exp);
-      }
-      int count2 = list2.size();
-      double mean2 = sample2Sum/count2;
-      
-      
-      //System.out.println(list);
-      //public double pairedT(double[] sample1,
-      //double[] sample2)
-      double[] sample2 = new double[count2];
-      double variance2 = 0;
-      int i = 0;
-      for(; i < count2; i++) {
-    	  sample2[i] = list2.get(i);
-    	  variance2 += Math.pow( sample2[i] - mean2, 2);
-      }
-      
-      variance2 = variance2 / (count2-1);
-      //System.out.println(sample2);
-      
-      double pooledVariance = ((count1-1) * variance1 + (count2-1) * variance2 ) / (count1+count2-2);
-      //double totalVariance= (variance1 + variance2) / (count1 + count2 - 2 ) ;
-      
-      //double temp= Math.sqrt( ((count1 - 1) * variance1 + (count2 - 1) * variance1) / (count1 + count2 - 2));
-      
-      double newT= (mean2 - mean1) / (Math.sqrt(pooledVariance * ( (1/count1) + (1/count2) )));
-      
-      System.out.println("-----********---------");
-      System.out.println(newT);
-      
-      
-      double tt = Math.abs(mean1 - mean2) / (Math.sqrt(variance1/count1 + variance2/count2));
-      
-      System.out.println("--------------");
-      System.out.println(tt);
-      
-      
-      System.out.println("result is ");
-      TTest t = new TTest();
-      double result = t.homoscedasticTTest(sample1, sample2); //got 0314
-      //double result = t.pairedT(sample1, sample2); //got 0314
-      System.out.println(result);
-      //STEP 6: Clean-up environment
-      rs.close();
-      stmt.close();
-      conn.close();
-   }catch(SQLException se){
-      se.printStackTrace();
-   }catch(Exception e){
-      e.printStackTrace();
-   }finally{
-      try{
-         if(stmt!=null)
-            stmt.close();
-      }catch(SQLException se2){
-      }
-      try{
-         if(conn!=null)
-            conn.close();
-      }catch(SQLException se){
-         se.printStackTrace();
-      }
-   }
-   System.out.println("Goodbye!");
-   }
+	static double variance_1;
+	static double variance_2;
+
+	static int count_1;
+	static int count_2;	
+
+
+	public static void main(String[] args ) throws SQLException {
+
+		String sqlQuery_1 = 
+
+			"SELECT MF.EXP FROM CLINICAL_FACT CF INNER JOIN MICROARRAY_FACT MF ON CF.S_ID=MF.S_ID WHERE CF.S_ID IN ("+
+			"SELECT DISTINCT S_ID FROM CLINICAL_FACT WHERE P_ID IN ( SELECT P_ID FROM CLINICAL_FACT WHERE DS_ID IN ("+
+			"SELECT DS_ID FROM DISEASE WHERE NAME='ALL')) AND S_ID IS NOT NULL ) AND MF.PB_ID IN" +  
+			"(SELECT MF.PB_ID FROM MICROARRAY_FACT MF INNER JOIN PROBE PB ON MF.PB_ID=PB.PB_ID WHERE PB.PB_ID IN"+
+			"(SELECT PB.PB_ID FROM PROBE PB INNER JOIN GENE_FACT GF ON PB.U_ID=GF.GENE_UID WHERE GF.GENE_UID IN"+
+			"(SELECT GF.GENE_UID FROM GENE_FACT GF WHERE GO_ID=12502)))";
+
+
+		String sqlQuery_2 = 
+			"SELECT MF.EXP FROM CLINICAL_FACT CF INNER JOIN MICROARRAY_FACT MF ON CF.S_ID=MF.S_ID WHERE CF.S_ID IN ("+
+			"SELECT DISTINCT S_ID FROM CLINICAL_FACT WHERE P_ID IN ("+
+			"SELECT P_ID FROM CLINICAL_FACT WHERE DS_ID IN (SELECT DS_ID FROM DISEASE WHERE NAME!='ALL')) AND S_ID IS NOT NULL)"+
+			"AND MF.PB_ID IN " + 
+			"(SELECT MF.PB_ID FROM MICROARRAY_FACT MF INNER JOIN PROBE PB ON MF.PB_ID=PB.PB_ID WHERE PB.PB_ID IN " +
+			"(SELECT PB.PB_ID FROM PROBE PB INNER JOIN GENE_FACT GF ON PB.U_ID=GF.GENE_UID WHERE GF.GENE_UID IN " +
+			"(SELECT GF.GENE_UID FROM GENE_FACT GF WHERE GO_ID=12502)))";
+
+
+		sample_1 = runObj.runQuery( sqlQuery_1 );
+		sample_2 = runObj.runQuery(sqlQuery_2);
+
+		count_1=sample_1.length;
+		count_2=sample_2.length;
+
+		mean_1=statObj.mean(sample_1);
+		mean_2=statObj.mean(sample_2);
+
+		variance_1=statObj.variance(sample_1,mean_1);
+		variance_2=statObj.variance(sample_2,mean_2);
+
+
+		System.out.println("--mean--");
+		System.out.println(mean_1);
+		System.out.println(mean_2);
+
+		System.out.println("--variance--");
+		System.out.println(variance_1);
+		System.out.println(variance_2);
+
+		double pooledVariance = (((count_1-1) * variance_1) + ((count_2-1) * variance_2 )) / (count_1+count_2-2);      
+		double newT= (mean_1 - mean_2) / Math.sqrt( (pooledVariance/count_1) + (pooledVariance/count_2));//1.007
+
+		System.out.println("-----********---------");
+		System.out.println(newT);
+
+		TTest t = new TTest();
+		double result = t.homoscedasticTTest(sample_1, sample_2); //got 0.314
+		System.out.println(result);
+	}
 }
+*/
