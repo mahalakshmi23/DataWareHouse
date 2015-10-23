@@ -52,7 +52,6 @@ public class Part3_2 {
 			ArrayList<ArrayList<Double>> allData = new ArrayList<ArrayList<Double>>();
 			//STEP 5: Extract data from result set
 
-			double sample1Sum = 0.0;
 
 			while(rs.next()){
 				Integer gene_uid = rs.getInt("U_ID");
@@ -170,8 +169,6 @@ public class Part3_2 {
 				Integer gene_uid = rs.getInt("U_ID");
 				Integer p_id = rs.getInt("P_ID");
 				if(informativeGene.contains(gene_uid)) {
-					
-					
 					//System.out.println(p_id+ ":" + exp  + ":" +  gene_uid);
 					if(!persons.contains(p_id)) {
 						//add new person
@@ -190,7 +187,7 @@ public class Part3_2 {
 			"WHERE CF.S_ID IN ( " +
 			"SELECT DISTINCT S_ID FROM CLINICAL_FACT WHERE P_ID IN ( " +
 			"SELECT P_ID FROM CLINICAL_FACT WHERE DS_ID IN (  " +
-			"SELECT DS_ID FROM DISEASE WHERE NAME<>'ALL')) AND S_ID IS NOT NULL ) and MF.PB_ID in ( "+
+			"SELECT DS_ID FROM DISEASE WHERE NAME != 'ALL')) AND S_ID IS NOT NULL ) and MF.PB_ID in ( "+
 			"Select pb.pb_id from probe pb inner join gene_fact gf on gf.gene_uid=pb.u_id ) ";
 			
 
@@ -212,10 +209,11 @@ public class Part3_2 {
 					notPersonsInformativeGenes.get(index).add(exp);
 				}
 			}
-			System.out.println(notPersonsInformativeGenes.size());
+			System.out.println("number of informative gene :" + informativeGene.size());
 			
 			//calculating correlation for pa and pn
 			ArrayList<Double> ra, rb;
+			
 			PearsonsCorrelation p = new PearsonsCorrelation();
 			double[] s1, s2;
 			ArrayList<Double> l1,l2;

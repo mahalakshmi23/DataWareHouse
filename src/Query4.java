@@ -1,4 +1,4 @@
-/*
+
 import java.sql.SQLException;
 import org.apache.commons.math3.stat.inference.TTest;
 
@@ -64,14 +64,13 @@ public class Query4 {
 		System.out.println(variance_2);
 
 		double pooledVariance = (((count_1-1) * variance_1) + ((count_2-1) * variance_2 )) / (count_1+count_2-2);      
-		double newT= (mean_1 - mean_2) / Math.sqrt( (pooledVariance/count_1) + (pooledVariance/count_2));//1.007
+		double newT= Math.abs(mean_1 - mean_2) / Math.sqrt( (pooledVariance/count_1) + (pooledVariance/count_2));//1.007
 
 		System.out.println("-----********---------");
 		System.out.println(newT);
 
 		TTest t = new TTest();
-		double result = t.homoscedasticTTest(sample_1, sample_2); //got 0.314
+		double result = t.t(sample_1, sample_2); //got 0.314
 		System.out.println(result);
 	}
 }
-*/

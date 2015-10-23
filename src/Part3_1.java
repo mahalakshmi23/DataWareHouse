@@ -63,7 +63,6 @@ public class Part3_1 {
 				//System.out.println(gene_uid + ":" + exp +" - " +genes.indexOf(gene_uid));
 				allData.get(genes.indexOf(gene_uid)).add(exp);	
 			}
-			System.out.println(allData);
 			
 			// get not all data
 			sql = "SELECT MF.EXP,pb.U_ID FROM CLINICAL_FACT CF INNER JOIN MICROARRAY_FACT MF ON CF.S_ID=MF.S_ID " +
@@ -93,8 +92,7 @@ public class Part3_1 {
 				//System.out.println(gene_uid + ":" + exp +" - " +notGenes.indexOf(gene_uid));
 				notData.get(notGenes.indexOf(gene_uid)).add(exp);	
 			}
-			System.out.println(allData.size());
-			System.out.println(notData.size());
+			
 			
 			ArrayList<Integer> informativeGene = new ArrayList<Integer>();
 			TTest t = new TTest();

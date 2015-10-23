@@ -1,4 +1,4 @@
-/*
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import org.apache.commons.math3.stat.inference.OneWayAnova;
@@ -67,4 +67,4 @@ public class Query5 {
 	}
 
 }
-*/
+
